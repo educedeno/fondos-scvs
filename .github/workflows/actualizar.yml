@@ -32,6 +32,15 @@ jobs:
           git add datos dashboard
           if git diff --cached --quiet -- datos/fondos_patrimonio_mensual.csv datos/fondos_composicion_mensual.csv datos/fondos.csv; then
             echo "Sin datos nuevos de la SCVS."
+            # Señal de vida: GitHub apaga las tareas programadas tras 60 dias sin actividad.
+            # Si el ultimo commit tiene mas de 30 dias, se guarda un registro pequeño.
+            if [ $(( $(date +%s) - $(git log -1 --format=%ct) )) -gt 2592000 ]; then
+              git reset -q
+              echo "Ultima revision sin datos nuevos: $(date +%Y-%m-%d)" > datos/senal_de_vida.txt
+              git add datos/senal_de_vida.txt
+              git commit -m "Señal de vida $(date +%Y-%m-%d): sin datos nuevos de la SCVS"
+              git push
+            fi
           else
             git commit -m "Datos SCVS actualizados $(date +%Y-%m-%d)"
             git push
