@@ -1,0 +1,38 @@
+# Actualiza automaticamente los datos de fondos de inversion desde la SCVS.
+# Corre todos los dias a las 07:00 (hora Ecuador). Solo guarda cambios si la
+# Superintendencia publico datos nuevos.
+name: Actualizar datos SCVS
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Descargar y procesar datos
+        run: |
+          python scripts/actualizar_datos.py
+          python scripts/generar_dashboard.py
+          rm -f datos/_descarga_scvs.zip
+      - name: Guardar cambios
+        run: |
+          git config user.name "actualizador-automatico"
+          git config user.email "actions@users.noreply.github.com"
+          git add datos dashboard
+          if git diff --cached --quiet -- datos/fondos_patrimonio_mensual.csv datos/fondos_composicion_mensual.csv datos/fondos.csv; then
+            echo "Sin datos nuevos de la SCVS."
+          else
+            git commit -m "Datos SCVS actualizados $(date +%Y-%m-%d)"
+            git push
+          fi

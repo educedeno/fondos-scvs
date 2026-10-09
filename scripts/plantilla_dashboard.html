@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panorama Fondos de Inversión</title>
+<style>
+:root{
+  --navy:#0d2b5e; --navy2:#16407f; --blue:#1f6fd1; --sky:#e8f0fb; --ink:#1b2430; --muted:#5d6b7c;
+  --line:#d9e1ec; --bg:#f4f6fa; --card:#ffffff; --up:#1e8a4c; --down:#c0392b; --hl:#fff4d6; --hlb:#e3a008;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--navy);color:#fff;padding:18px 24px}
+header h1{margin:0;font-size:24px;letter-spacing:.2px}
+header p{margin:4px 0 0;opacity:.85}
+.wrap{max-width:1400px;margin:0 auto;padding:16px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-bottom:14px}
+.controls label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:4px}
+select{padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:14px;min-width:170px}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff}
+.seg button{border:0;background:#fff;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--ink)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--navy);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi .v{font-size:24px;font-weight:700;color:var(--navy)}
+.kpi .l{color:var(--muted);font-size:13px}
+.kpi.hl{background:var(--hl);border-color:var(--hlb)}
+.pos{color:var(--up)} .neg{color:var(--down)}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.card h2{margin:0 0 10px;font-size:16px;color:var(--navy);text-align:center}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--navy);color:#fff;text-align:right;padding:8px;font-weight:600;position:sticky;top:0}
+th:first-child{text-align:left}
+td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+td:first-child{text-align:left;white-space:normal}
+tr.adm{cursor:pointer;font-weight:600}
+tr.adm td:first-child::before{content:"⊞ ";color:var(--muted);font-weight:400}
+tr.adm.open td:first-child::before{content:"⊟ "}
+tr.fondo td{color:#333;font-size:12.5px;background:#fafbfd}
+tr.fondo td:first-child{padding-left:28px}
+tr.genesis td{background:var(--hl)}
+tr.tot td{background:var(--navy);color:#fff;font-weight:700}
+.tablebox{max-height:620px;overflow:auto}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:4px}
+.bars .row{display:grid;grid-template-columns:150px 1fr 60px;gap:8px;align-items:center;margin:7px 0;font-size:13px}
+.bars .track{background:var(--sky);border-radius:4px;height:18px;overflow:hidden}
+.bars .fill{background:var(--blue);height:100%}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.bars .row{grid-template-columns:110px 1fr 52px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Panorama del Mercado de Fondos de Inversión</h1>
+  <p>Evolución, participación de mercado y dinámica de crecimiento de las administradoras de fondos en Ecuador</p>
+</header>
+<div class="wrap">
+  <div class="controls">
+    <label>Mes de corte<select id="fFecha"></select></label>
+    <label>Administradora<select id="fAdm"></select></label>
+    <label>Tipo de fondo<div class="seg" id="fTipo">
+      <button data-v="Todos" class="on">Todos</button><button data-v="Administrado">Administrados</button><button data-v="Colectivo">Colectivos</button><button data-v="Cotizado">Cotizados</button>
+    </div></label>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Ranking de Administradoras por Patrimonio</h2>
+      <div class="tablebox"><table id="tabla"></table></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="card chart"><h2 id="tEvo">Evolución del Patrimonio</h2><div id="cEvo"></div></div>
+      <div class="card chart"><h2 id="tShare">Participación de mercado</h2><div id="cShare"></div><div class="legend" id="lShare"></div></div>
+      <div class="card"><h2 id="tComp">Clasificación por Instrumento</h2><div class="bars" id="cComp"></div></div>
+    </div>
+  </div>
+  <p class="note" id="nota"></p>
+</div>
+<script>
+const D = /*__DATOS__*/null;
+const FOCO = "AFPGENESIS";
+const S = {fi: D.fechas.length - 1, adm: "Todas", tipo: "Todos", open: new Set([FOCO])};
+const $ = id => document.getElementById(id);
+const MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const mes = f => { const [y,m] = f.split("-"); return MESES[+m-1] + " " + y; };
+const usd = v => "$" + Math.round(v).toLocaleString("en-US");
+const mill = v => v >= 1e9 ? "$" + (v/1e9).toFixed(3) + " mil M" : "$" + (v/1e6).toFixed(1) + " M";
+const pct = (v, d=2) => v == null || !isFinite(v) ? "" : (v*100).toFixed(d) + " %";
+const OTRAS = new Set(["POR CONFIRMAR","FONDOS CERRADOS","SIN ASIGNAR"]);
+const admLabel = a => ({"POR CONFIRMAR":"Otras (por confirmar)","FONDOS CERRADOS":"Fondos ya cerrados","SIN ASIGNAR":"Fondos nuevos sin asignar"})[a] || a;
+
+function incluye(i){ const f = D.fondos[i]; return S.tipo === "Todos" || f.t === S.tipo; }
+function totalesAdm(fi){
+  const t = {}; const s = D.serie[fi] || {};
+  for (const k in s){ const i = +k; if (!incluye(i)) continue; const a = D.fondos[i].a; t[a] = (t[a]||0) + s[k]; }
+  return t;
+}
+function totalMercado(fi){ const t = totalesAdm(fi); return Object.values(t).reduce((x,y)=>x+y,0); }
+function valorAdm(fi, a){ if (fi < 0) return null; const t = totalesAdm(fi); return a === "Todas" ? Object.values(t).reduce((x,y)=>x+y,0) : (t[a]||0); }
+function variacion(cur, prev){ return prev ? cur/prev - 1 : null; }
+function arrow(v){ if (v == null || !isFinite(v)) return ""; return v >= 0 ? '<span class="pos">▲ ' + pct(v) + '</span>' : '<span class="neg">▼ ' + pct(v) + '</span>'; }
+
+function initControles(){
+  const sf = $("fFecha");
+  D.fechas.forEach((f,i) => sf.add(new Option(mes(f), i)));
+  sf.value = S.fi;
+  sf.onchange = () => { S.fi = +sf.value; render(); };
+  const admins = [...new Set(D.fondos.map(f => f.a))].sort();
+  const sa = $("fAdm"); sa.add(new Option("Todas", "Todas"));
+  admins.forEach(a => sa.add(new Option(admLabel(a), a)));
+  sa.onchange = () => { S.adm = sa.value; if (S.adm !== "Todas") S.open.add(S.adm); render(); };
+  $("fTipo").onclick = e => { const b = e.target.closest("button"); if (!b) return;
+    [...$("fTipo").children].forEach(x => x.classList.toggle("on", x === b)); S.tipo = b.dataset.v; render(); };
+}
+
+function renderKPIs(){
+  const fi = S.fi, t = totalesAdm(fi), tot = totalMercado(fi);
+  const nAdm = Object.keys(t).filter(a => !OTRAS.has(a) && t[a] > 0).length;
+  const nF = Object.keys(D.serie[fi]).filter(k => incluye(+k)).length;
+  const m = variacion(tot, fi>0 ? totalMercado(fi-1) : null), y = variacion(tot, fi>=12 ? totalMercado(fi-12) : null);
+  const rank = Object.entries(t).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  const foco = S.adm === "Todas" ? FOCO : S.adm;
+  const sh = (t[foco]||0) / tot;
+  $("kpis").innerHTML = `
+    <div class="kpi"><div class="v">${mill(tot)}</div><div class="l">Patrimonio del mercado</div></div>
+    <div class="kpi"><div class="v">${nAdm}</div><div class="l">Administradoras</div></div>
+    <div class="kpi"><div class="v">${nF}</div><div class="l">Fondos con patrimonio</div></div>
+    <div class="kpi"><div class="v ${m<0?"neg":"pos"}">${pct(m)}</div><div class="l">Crecimiento mensual del mercado</div></div>
+    <div class="kpi"><div class="v ${y<0?"neg":"pos"}">${pct(y)}</div><div class="l">Crecimiento anual del mercado</div></div>
+    <div class="kpi hl"><div class="v">${pct(sh)}</div><div class="l">Participación ${admLabel(foco)} · puesto #${rank.indexOf(foco)+1}</div></div>`;
+}
+
+function renderTabla(){
+  const fi = S.fi, s = D.serie[fi], sp = D.serie[fi-1] || {}, sy = D.serie[fi-12] || {};
+  const t = totalesAdm(fi), tp = fi>0 ? totalesAdm(fi-1) : {}, ty = fi>=12 ? totalesAdm(fi-12) : {};
+  const tot = Object.values(t).reduce((a,b)=>a+b,0);
+  const filas = Object.entries(t).sort((a,b)=> OTRAS.has(a[0]) - OTRAS.has(b[0]) || b[1]-a[1]);
+  let h = "<tr><th>Administradora</th><th>Patrimonio</th><th>Share</th><th>Var. mensual</th><th>Var. anual</th></tr>";
+  for (const [a, v] of filas){
+    const open = S.open.has(a);
+    h += `<tr class="adm ${open?"open":""} ${a===FOCO?"genesis":""}" data-a="${a}"><td>${admLabel(a)}</td><td>${usd(v)}</td><td>${pct(v/tot)}</td><td>${arrow(variacion(v,tp[a]))}</td><td>${arrow(variacion(v,ty[a]))}</td></tr>`;
+    if (open){
+      const fs = Object.keys(s).map(Number).filter(i => D.fondos[i].a === a && incluye(i)).sort((x,y)=>s[y]-s[x]);
+      for (const i of fs) h += `<tr class="fondo ${a===FOCO?"genesis":""}"><td>${D.fondos[i].n}${D.fondos[i].p?' <span style="color:#8a96a8">· '+D.fondos[i].p+'</span>':''}</td><td>${usd(s[i])}</td><td>${pct(s[i]/tot)}</td><td>${arrow(variacion(s[i],sp[i]))}</td><td>${arrow(variacion(s[i],sy[i]))}</td></tr>`;
+    }
+  }
+  const tp_ = Object.values(tp).reduce((a,b)=>a+b,0), ty_ = Object.values(ty).reduce((a,b)=>a+b,0);
+  h += `<tr class="tot"><td>Total</td><td>${usd(tot)}</td><td>100.00 %</td><td>${pct(variacion(tot,tp_))}</td><td>${pct(variacion(tot,ty_))}</td></tr>`;
+  $("tabla").innerHTML = h;
+  $("tabla").querySelectorAll("tr.adm").forEach(tr => tr.onclick = () => { const a = tr.dataset.a; S.open.has(a) ? S.open.delete(a) : S.open.add(a); renderTabla(); });
+}
+
+function lineChart(el, series, fmt, opts={}){
+  const W = 640, H = 250, L = 64, R = 16, T = 18, B = 30;
+  const n = series[0].vals.length;
+  const all = series.flatMap(s => s.vals).filter(v => v != null);
+  let lo = Math.min(...all), hi = Math.max(...all); if (opts.zero) lo = 0;
+  const pad = (hi-lo)*0.08 || hi*0.1 || 1; lo = Math.max(0, lo - (opts.zero?0:pad)); hi += pad;
+  const x = i => L + (W-L-R) * (n<=1 ? 0.5 : i/(n-1)), y = v => T + (H-T-B) * (1 - (v-lo)/(hi-lo));
+  let g = "";
+  for (let k=0;k<=4;k++){ const v = lo + (hi-lo)*k/4; g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#e6ebf2"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="#5d6b7c">${fmt(v,true)}</text>`; }
+  const lab = opts.labels;
+  for (let i=0;i<n;i++) if (i===n-1 || (n-1-i)%3===0) g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="#5d6b7c">${lab[i]}</text>`;
+  for (const s of series){
+    const pts = s.vals.map((v,i)=> v==null?null:[x(i),y(v)]).filter(Boolean);
+    g += `<polyline fill="none" stroke="${s.color}" stroke-width="${s.w||2.5}" ${s.dash?'stroke-dasharray="5 4"':''} points="${pts.map(p=>p.join(",")).join(" ")}"/>`;
+    const last = pts[pts.length-1]; const lv = s.vals[s.vals.length-1];
+    if (last) g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="${s.color}"/><text x="${last[0]-6}" y="${last[1]-9}" text-anchor="end" font-size="12" font-weight="600" fill="${s.color}">${fmt(lv)}</text>`;
+    s.vals.forEach((v,i)=>{ if(v!=null) g += `<circle cx="${x(i)}" cy="${y(v)}" r="9" fill="transparent"><title>${lab[i]}: ${fmt(v)}</title></circle>`; });
+  }
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+
+function renderCharts(){
+  const fi = S.fi, desde = Math.max(0, fi-23), idxs = []; for (let i=desde;i<=fi;i++) idxs.push(i);
+  const labels = idxs.map(i => mes(D.fechas[i]).replace(" 20"," "));
+  const a = S.adm;
+  $("tEvo").textContent = "Evolución del Patrimonio · " + (a==="Todas" ? "Mercado" : admLabel(a));
+  lineChart($("cEvo"), [{vals: idxs.map(i => valorAdm(i, a)), color:"#1f6fd1"}], (v,ax)=> ax ? (v>=1e9?(v/1e9).toFixed(1)+" mil M":(v/1e6).toFixed(0)+" M") : mill(v), {labels});
+
+  const foco = a === "Todas" ? FOCO : a;
+  const sh = idxs.map(i => { const t = totalesAdm(i), tot = Object.values(t).reduce((x,y)=>x+y,0); return tot ? (t[foco]||0)/tot : null; });
+  const series = [{vals: sh, color:"#e3a008", w:3}];
+  if (foco === FOCO){
+    // referencia: la administradora inmediatamente arriba y abajo en el ranking del mes de corte
+    const r = Object.entries(totalesAdm(fi)).sort((x,y)=>y[1]-x[1]).map(x=>x[0]); const p = r.indexOf(FOCO);
+    [[r[p-1],"#16407f"],[r[p+1],"#8a96a8"]].forEach(([o,c]) => { if (o && !OTRAS.has(o)) series.push({name:o, vals: idxs.map(i => { const t = totalesAdm(i), tot = Object.values(t).reduce((x,y)=>x+y,0); return tot ? (t[o]||0)/tot : null; }), color:c, w:2, dash:true}); });
+  }
+  $("tShare").textContent = "Participación de mercado · " + admLabel(foco);
+  lineChart($("cShare"), series, (v)=> (v*100).toFixed(2)+" %", {labels});
+  $("lShare").innerHTML = `<span><i style="background:#e3a008"></i>${admLabel(foco)}</span>` + series.slice(1).map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join("");
+
+  const agg = {}; let tot = 0;
+  for (const [f, fo, d] of D.comp){ if (f !== fi || !incluye(fo)) continue; if (a !== "Todas" && D.fondos[fo].a !== a) continue;
+    for (const k in d){ agg[k] = (agg[k]||0) + d[k]; tot += d[k]; } }
+  $("tComp").textContent = "Clasificación por Instrumento · " + (a==="Todas" ? "Mercado" : admLabel(a));
+  const rows = Object.entries(agg).filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]);
+  $("cComp").innerHTML = rows.length ? rows.map(([k,v]) => `<div class="row"><span>${k}</span><div class="track"><div class="fill" style="width:${(v/rows[0][1]*100).toFixed(1)}%"></div></div><b style="text-align:right">${pct(v/tot,1)}</b></div>`).join("")
+    + `<p class="note" style="margin-top:8px">Base: inversiones financieras reportadas en balances (${mill(tot)})</p>` : '<p class="note">Sin datos de composición para este corte.</p>';
+}
+
+function render(){
+  renderKPIs(); renderTabla(); renderCharts();
+  $("nota").textContent = `Fuente: Superintendencia de Compañías, Valores y Seguros (SCVS) – estados financieros mensuales de fondos de inversión (información pública). Corte: ${mes(D.fechas[S.fi])}. Datos procesados: ${D.actualizado}.`;
+}
+initControles(); render();
+</script>
+</body>
+</html>
