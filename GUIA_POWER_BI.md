@@ -16,7 +16,7 @@ Los datos se conectan solos: cuando la Superintendencia publique información nu
 **¿De dónde se conecta Power BI?** Hay dos opciones:
 
 - **Opción A, internet (recomendada).** Los archivos se publican en GitHub y se actualizan solos todos los días. Funciona en cualquier computadora y no hay que instalar nada.
-  - Dirección de cada archivo: `https://raw.githubusercontent.com/USUARIO/REPOSITORIO/main/datos/NOMBRE_ARCHIVO.csv`
+  - Dirección de cada archivo: `https://raw.githubusercontent.com/educedeno/fondos-scvs/main/datos/NOMBRE_ARCHIVO.csv`
   - Eduardo te pasa las direcciones exactas.
 - **Opción B, carpeta local.** Se usa la carpeta `datos` de este proyecto. Para traer datos nuevos, se hace doble clic en `actualizar.bat`.
 
@@ -46,7 +46,7 @@ Cambia el nombre de las tablas a: **Fondos**, **Patrimonio** y **Composicion**. 
 > Plantilla en código (opcional). Si prefieres pegar el código, ve a **Inicio → Editor avanzado** y usa esto para la tabla Patrimonio (cambia la dirección por la tuya):
 > ```
 > let
->     Origen = Csv.Document(Web.Contents("https://raw.githubusercontent.com/USUARIO/REPOSITORIO/main/datos/fondos_patrimonio_mensual.csv"),
+>     Origen = Csv.Document(Web.Contents("https://raw.githubusercontent.com/educedeno/fondos-scvs/main/datos/fondos_patrimonio_mensual.csv"),
 >              [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
 >     Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
 >     Tipos = Table.TransformColumnTypes(Encabezados,

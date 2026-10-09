@@ -47,5 +47,5 @@ Se compararon los totales por administradora en dos fechas: **agosto 2026** y **
 2. Subir esta carpeta al repositorio.
 3. GitHub ejecuta `.github/workflows/actualizar.yml` todos los días a las 07:00 (hora de Ecuador). Si la SCVS publicó datos nuevos, actualiza los CSV.
 4. En Power BI se conecta con **Obtener datos → Web** a:
-   `https://raw.githubusercontent.com/USUARIO/REPOSITORIO/main/datos/fondos_patrimonio_mensual.csv`
+   `https://raw.githubusercontent.com/educedeno/fondos-scvs/main/datos/fondos_patrimonio_mensual.csv`
    y lo mismo con `fondos.csv` y `fondos_composicion_mensual.csv`.
