@@ -1,0 +1,16 @@
+relationship 7a1e0c3b-1111-4a00-8000-000000000001
+	fromColumn: Patrimonio.ruc_fondo
+	toColumn: Fondos.ruc_fondo
+
+relationship 7a1e0c3b-1111-4a00-8000-000000000002
+	fromColumn: Composicion.ruc_fondo
+	toColumn: Fondos.ruc_fondo
+
+relationship 7a1e0c3b-1111-4a00-8000-000000000003
+	fromColumn: Patrimonio.fecha
+	toColumn: Meses.Fecha
+
+relationship 7a1e0c3b-1111-4a00-8000-000000000004
+	fromColumn: Composicion.fecha
+	toColumn: Meses.Fecha
+

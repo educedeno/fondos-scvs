@@ -1,0 +1,60 @@
+table Composicion
+	lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000301
+
+	measure 'Valor Instrumento' =
+			VAR Corte = [Fecha de Corte]
+			RETURN CALCULATE ( SUM ( Composicion[valor] ), REMOVEFILTERS ( Meses ), Composicion[fecha] = Corte )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000310
+
+	measure '% del Portafolio' = DIVIDE ( [Valor Instrumento], CALCULATE ( [Valor Instrumento], REMOVEFILTERS ( Composicion[Instrumento], Composicion[Grupo de instrumento] ) ) )
+		formatString: 0.0%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000311
+
+	column ruc_fondo
+		dataType: string
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000302
+		summarizeBy: none
+		sourceColumn: ruc_fondo
+
+	column fecha
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000303
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Instrumento
+		dataType: string
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000304
+		summarizeBy: none
+		sourceColumn: instrumento
+
+	column 'Grupo de instrumento'
+		dataType: string
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000305
+		summarizeBy: none
+		sourceColumn: grupo_instrumento
+
+	column valor
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000306
+		summarizeBy: sum
+		sourceColumn: valor
+
+	partition Composicion = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(Web.Contents(URL_Datos & "fondos_composicion_mensual.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Columnas = Table.SelectColumns(Encabezados, {"ruc_fondo", "fecha", "instrumento", "grupo_instrumento", "valor"}),
+				    Tipos = Table.TransformColumnTypes(Columnas, {{"ruc_fondo", type text}, {"fecha", type date}, {"instrumento", type text}, {"grupo_instrumento", type text}, {"valor", type number}}, "en-US")
+				in
+				    Tipos
+

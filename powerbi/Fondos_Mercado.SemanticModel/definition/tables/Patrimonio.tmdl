@@ -1,0 +1,162 @@
+table Patrimonio
+	lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000201
+
+	/// Patrimonio del mes de corte: el último mes dentro de los filtros (por defecto, el más reciente publicado por la SCVS).
+	measure 'Patrimonio Total' =
+			VAR Corte = [Fecha de Corte]
+			RETURN CALCULATE ( SUM ( Patrimonio[patrimonio] ), REMOVEFILTERS ( Meses ), Patrimonio[fecha] = Corte )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000210
+
+	/// Último mes con datos dentro de los filtros de fecha. Es el mismo para todos los fondos.
+	measure 'Fecha de Corte' = CALCULATE ( MAX ( Patrimonio[fecha] ), ALLSELECTED ( Fondos ) )
+		formatString: mmm yyyy
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000211
+
+	measure 'Patrimonio Mercado' = CALCULATE ( [Patrimonio Total], ALLSELECTED ( Fondos ) )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000212
+
+	measure 'Patrimonio Mercado (mil M)' = DIVIDE ( [Patrimonio Mercado], 1e9 )
+		formatString: \$#,0.000 "mil M"
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000213
+
+	measure 'Share %' = DIVIDE ( [Patrimonio Total], [Patrimonio Mercado] )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000214
+
+	measure 'Patrimonio Mes Anterior' =
+			VAR Corte = EOMONTH ( [Fecha de Corte], -1 )
+			RETURN CALCULATE ( SUM ( Patrimonio[patrimonio] ), REMOVEFILTERS ( Meses ), Patrimonio[fecha] = Corte )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000215
+
+	measure 'Patrimonio Año Anterior' =
+			VAR Corte = EOMONTH ( [Fecha de Corte], -12 )
+			RETURN CALCULATE ( SUM ( Patrimonio[patrimonio] ), REMOVEFILTERS ( Meses ), Patrimonio[fecha] = Corte )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000216
+
+	measure 'Variación Mensual %' = DIVIDE ( [Patrimonio Total] - [Patrimonio Mes Anterior], [Patrimonio Mes Anterior] )
+		formatString: ▲ 0.00%;▼ -0.00%;0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000217
+
+	measure 'Variación Anual %' = DIVIDE ( [Patrimonio Total] - [Patrimonio Año Anterior], [Patrimonio Año Anterior] )
+		formatString: ▲ 0.00%;▼ -0.00%;0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000218
+
+	measure 'Crecimiento Mensual Mercado %' = CALCULATE ( [Variación Mensual %], ALLSELECTED ( Fondos ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000219
+
+	measure 'Crecimiento Anual Mercado %' = CALCULATE ( [Variación Anual %], ALLSELECTED ( Fondos ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021a
+
+	measure 'Nº Administradoras' =
+			VAR Corte = [Fecha de Corte]
+			RETURN
+			    COUNTROWS (
+			        FILTER (
+			            SUMMARIZE (
+			                FILTER ( CALCULATETABLE ( Patrimonio, REMOVEFILTERS ( Meses ), ALLSELECTED ( Fondos ) ), Patrimonio[fecha] = Corte && Patrimonio[patrimonio] > 0 ),
+			                Fondos[codigo_administradora]
+			            ),
+			            NOT Fondos[codigo_administradora] IN { "POR CONFIRMAR", "FONDOS CERRADOS", "SIN ASIGNAR" }
+			        )
+			    )
+		formatString: 0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021b
+
+	measure 'Nº Fondos' =
+			VAR Corte = [Fecha de Corte]
+			RETURN
+			    COUNTROWS (
+			        FILTER ( CALCULATETABLE ( Patrimonio, REMOVEFILTERS ( Meses ), ALLSELECTED ( Fondos ) ), Patrimonio[fecha] = Corte && Patrimonio[patrimonio] > 0 )
+			    )
+		formatString: 0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021c
+
+	/// Participación de mercado de AFP Génesis, para seguirla en el tiempo.
+	measure 'Share AFPGENESIS %' = DIVIDE ( CALCULATE ( [Patrimonio Total], KEEPFILTERS ( Fondos[codigo_administradora] = "AFPGENESIS" ) ), [Patrimonio Mercado] )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021d
+
+	measure 'Ranking AFPGENESIS' =
+			VAR Tabla = ADDCOLUMNS ( CALCULATETABLE ( VALUES ( Fondos[codigo_administradora] ), ALLSELECTED ( Fondos ) ), "@p", [Patrimonio Total] )
+			VAR Genesis = MAXX ( FILTER ( Tabla, Fondos[codigo_administradora] = "AFPGENESIS" ), [@p] )
+			RETURN COUNTROWS ( FILTER ( Tabla, [@p] > Genesis ) ) + 1
+		formatString: 0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021e
+
+	measure 'Texto Corte' = "Fuente: Superintendencia de Compañías, Valores y Seguros (SCVS) – Información pública. Corte: " & FORMAT ( [Fecha de Corte], "dd/mm/yyyy" ) & " | Elaboración: AFP Génesis."
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021f
+
+	/// Para las graficas de evolucion: muestra solo los ultimos 24 meses publicados.
+	measure 'Patrimonio (últimos 24 meses)' =
+			VAR Ultimo = CALCULATE ( MAX ( Patrimonio[fecha] ), REMOVEFILTERS () )
+			RETURN IF ( MAX ( Meses[Fecha] ) > EOMONTH ( Ultimo, -24 ), [Patrimonio Total] )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000220
+
+	measure 'Share AFPGENESIS (últimos 24 meses)' =
+			VAR Ultimo = CALCULATE ( MAX ( Patrimonio[fecha] ), REMOVEFILTERS () )
+			RETURN IF ( MAX ( Meses[Fecha] ) > EOMONTH ( Ultimo, -24 ), [Share AFPGENESIS %] )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000221
+
+	measure 'Color Variación Mensual' = IF ( [Variación Mensual %] < 0, "#C0392B", "#1E8A4C" )
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000230
+
+	measure 'Color Variación Anual' = IF ( [Variación Anual %] < 0, "#C0392B", "#1E8A4C" )
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000231
+
+	column ruc_fondo
+		dataType: string
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000202
+		summarizeBy: none
+		sourceColumn: ruc_fondo
+
+	column fecha
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000203
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column activo
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000204
+		summarizeBy: sum
+		sourceColumn: activo
+
+	column pasivo
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000205
+		summarizeBy: sum
+		sourceColumn: pasivo
+
+	column patrimonio
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000206
+		summarizeBy: sum
+		sourceColumn: patrimonio
+
+	partition Patrimonio = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(Web.Contents(URL_Datos & "fondos_patrimonio_mensual.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Columnas = Table.SelectColumns(Encabezados, {"ruc_fondo", "fecha", "activo", "pasivo", "patrimonio"}),
+				    Tipos = Table.TransformColumnTypes(Columnas, {{"ruc_fondo", type text}, {"fecha", type date}, {"activo", type number}, {"pasivo", type number}, {"patrimonio", type number}}, "en-US")
+				in
+				    Tipos
+

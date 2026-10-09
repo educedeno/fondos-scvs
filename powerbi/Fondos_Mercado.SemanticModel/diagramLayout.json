@@ -1,0 +1,74 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 50,
+            "y": -19.682032885533204
+          },
+          "nodeIndex": "Patrimonio",
+          "nodeLineageTag": "6f1d2c10-0b3a-4d1e-9c11-000000000201",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 336.96457615042834,
+            "y": -50
+          },
+          "nodeIndex": "Composicion",
+          "nodeLineageTag": "6f1d2c10-0b3a-4d1e-9c11-000000000301",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 654.987216828979,
+            "y": 199.71327966886594
+          },
+          "nodeIndex": "Fondos",
+          "nodeLineageTag": "6f1d2c10-0b3a-4d1e-9c11-000000000001",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 155.82374256582889,
+            "y": 332.26200344157417
+          },
+          "nodeIndex": "Meses",
+          "nodeLineageTag": "6f1d2c10-0b3a-4d1e-9c11-000000000101",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

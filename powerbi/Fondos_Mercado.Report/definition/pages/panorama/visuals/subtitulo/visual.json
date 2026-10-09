@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "subtitulo",
+  "position": {
+    "x": 20,
+    "y": 60,
+    "z": 0,
+    "height": 40,
+    "width": 1880,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Evolución, participación de mercado y dinámica de crecimiento de las administradoras de fondos en Ecuador",
+                    "textStyle": {
+                      "fontWeight": "normal",
+                      "fontSize": "13pt",
+                      "color": "#404B5A"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "center"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

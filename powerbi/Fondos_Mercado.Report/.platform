@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Fondos_Mercado"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "fb17af18-b951-45a3-a018-8943581890ca"
+  }
+}

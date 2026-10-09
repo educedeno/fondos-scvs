@@ -1,0 +1,6 @@
+/// Carpeta en internet donde el actualizador automático publica los datos de la SCVS.
+expression URL_Datos = "https://raw.githubusercontent.com/educedeno/fondos-scvs/main/datos/" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 0c3f6a51-7a0e-4a52-9a43-2b8f4d0e1a01
+
+	annotation PBI_ResultType = Text
+

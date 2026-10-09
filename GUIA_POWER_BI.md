@@ -3,6 +3,17 @@
 Esta guía arma el tablero **Panorama del Mercado de Fondos de Inversión** en Power BI Desktop.
 Los datos se conectan solos: cuando la Superintendencia publique información nueva, basta con presionar **Actualizar**.
 
+## 0. Ya está hecho: `Panorama_Fondos_Inversion.pbix`
+
+El archivo **`Panorama_Fondos_Inversion.pbix`** ya trae el tablero completo armado y conectado a los datos.
+
+1. Ábrelo con doble clic. Necesitas Power BI Desktop, que es gratis.
+2. Presiona **Inicio → Actualizar**. La primera vez, Power BI pregunta cómo conectarse a `raw.githubusercontent.com`: elige **Anónimo** y presiona **Conectar**. Los datos son públicos, así que no hace falta usuario ni clave.
+3. Listo. Para ver los fondos de una administradora, haz clic en el **⊞** junto a su nombre en el ranking.
+4. **Mes de corte:** si lo dejas vacío, muestra siempre el último mes publicado. Si eliges un mes, todo el tablero muestra ese mes, excepto las gráficas de evolución, que siempre muestran los últimos 24 meses.
+
+El resto de esta guía sirve para modificar el tablero o armar uno nuevo desde cero.
+
 ---
 
 ## 1. Las 3 tablas de datos
