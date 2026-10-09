@@ -149,7 +149,7 @@ def procesar(ruta_zip):
         return "FONDOS CERRADOS" if fondos[ruc][1] < ultimo else "SIN ASIGNAR"
 
     with open(os.path.join(DATOS, "fondos.csv"), "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["ruc_fondo", "fondo", "nombre_corto", "administradora", "plazo_permanencia", "tipo_fondo", "ultimo_reporte"])
         for ruc, (nom, ult) in sorted(fondos.items(), key=lambda x: x[1][0]):
             m = mapeo.get(ruc, {})
@@ -157,13 +157,13 @@ def procesar(ruta_zip):
                         m.get("plazo_permanencia", ""), m.get("tipo_fondo", ""), ult])
 
     with open(os.path.join(DATOS, "fondos_patrimonio_mensual.csv"), "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["ruc_fondo", "fecha", "administradora", "activo", "pasivo", "patrimonio"])
         for (ruc, fecha), r in sorted(patrimonio.items(), key=lambda x: (x[0][1], x[0][0])):
             w.writerow([ruc, fecha, admin_de(ruc), round(r["activo"], 2), round(r["pasivo"], 2), round(r["patrimonio"], 2)])
 
     with open(os.path.join(DATOS, "fondos_composicion_mensual.csv"), "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["ruc_fondo", "fecha", "administradora", "instrumento", "grupo_instrumento", "valor"])
         for (ruc, fecha, inst), v in sorted(composicion.items(), key=lambda x: (x[0][1], x[0][0], x[0][2])):
             if v:
