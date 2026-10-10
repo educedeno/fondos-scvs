@@ -11,6 +11,32 @@ table Composicion
 		formatString: 0.0%
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000311
 
+	measure 'Valor Invertido Total' = CALCULATE ( [Valor Instrumento], REMOVEFILTERS ( Composicion[Instrumento], Composicion[Grupo de instrumento] ) )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000312
+
+	measure 'Valor Invertido (mil M)' = DIVIDE ( [Valor Invertido Total], 1e6 )
+		formatString: \$#,0.0 "M"
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000313
+
+	/// Grupo de instrumento con mayor peso en el portafolio, p. ej. "Depósitos Bancarios (41.4%)".
+	measure 'Instrumento Principal' =
+			VAR Top1 = TOPN ( 1, VALUES ( Composicion[Grupo de instrumento] ), [Valor Instrumento], DESC )
+			VAR Nombre = MAXX ( Top1, Composicion[Grupo de instrumento] )
+			VAR Peso = DIVIDE ( CALCULATE ( [Valor Instrumento], Composicion[Grupo de instrumento] = Nombre ), [Valor Invertido Total] )
+			RETURN IF ( NOT ISBLANK ( Nombre ), Nombre & " (" & FORMAT ( Peso, "0.0%" ) & ")" )
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000314
+
+	measure '% Deuda Pública' = DIVIDE ( CALCULATE ( [Valor Instrumento], Composicion[Grupo de instrumento] = "Deuda Pública" ), [Valor Invertido Total] )
+		formatString: 0.0%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000315
+
+	measure 'Valor Instrumento (últimos 24 meses)' =
+			VAR Ultimo = CALCULATE ( MAX ( Composicion[fecha] ), REMOVEFILTERS () )
+			RETURN IF ( MAX ( Meses[Fecha] ) > EOMONTH ( Ultimo, -24 ), [Valor Instrumento] )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000316
+
 	column ruc_fondo
 		dataType: string
 		isHidden

@@ -13,7 +13,7 @@ table Patrimonio
 		formatString: mmm yyyy
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000211
 
-	measure 'Patrimonio Mercado' = CALCULATE ( [Patrimonio Total], ALLSELECTED ( Fondos ) )
+	measure 'Patrimonio Mercado' = CALCULATE ( [Patrimonio Total], ALLSELECTED ( Fondos ), REMOVEFILTERS ( Fondos[ruc_fondo], Fondos[Nombre legal], Fondos[Fondo], Fondos[nombre_corto], Fondos[Administradora], Fondos[codigo_administradora] ) )
 		formatString: \$#,0
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000212
 
@@ -45,11 +45,11 @@ table Patrimonio
 		formatString: ▲ 0.00%;▼ -0.00%;0.00%
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000218
 
-	measure 'Crecimiento Mensual Mercado %' = CALCULATE ( [Variación Mensual %], ALLSELECTED ( Fondos ) )
+	measure 'Crecimiento Mensual Mercado %' = CALCULATE ( [Variación Mensual %], ALLSELECTED ( Fondos ), REMOVEFILTERS ( Fondos[ruc_fondo], Fondos[Nombre legal], Fondos[Fondo], Fondos[nombre_corto], Fondos[Administradora], Fondos[codigo_administradora] ) )
 		formatString: 0.00%
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000219
 
-	measure 'Crecimiento Anual Mercado %' = CALCULATE ( [Variación Anual %], ALLSELECTED ( Fondos ) )
+	measure 'Crecimiento Anual Mercado %' = CALCULATE ( [Variación Anual %], ALLSELECTED ( Fondos ), REMOVEFILTERS ( Fondos[ruc_fondo], Fondos[Nombre legal], Fondos[Fondo], Fondos[nombre_corto], Fondos[Administradora], Fondos[codigo_administradora] ) )
 		formatString: 0.00%
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021a
 
@@ -78,7 +78,7 @@ table Patrimonio
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021c
 
 	/// Participación de mercado de AFP Génesis, para seguirla en el tiempo.
-	measure 'Share AFPGENESIS %' = DIVIDE ( CALCULATE ( [Patrimonio Total], KEEPFILTERS ( Fondos[codigo_administradora] = "AFPGENESIS" ) ), [Patrimonio Mercado] )
+	measure 'Share AFPGENESIS %' = DIVIDE ( CALCULATE ( [Patrimonio Total], ALLSELECTED ( Fondos ), REMOVEFILTERS ( Fondos[ruc_fondo], Fondos[Nombre legal], Fondos[Fondo], Fondos[nombre_corto], Fondos[Administradora], Fondos[codigo_administradora] ), Fondos[codigo_administradora] = "AFPGENESIS" ), [Patrimonio Mercado] )
 		formatString: 0.00%
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000021d
 
@@ -110,6 +110,14 @@ table Patrimonio
 
 	measure 'Color Variación Anual' = IF ( [Variación Anual %] < 0, "#C0392B", "#1E8A4C" )
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000231
+
+	/// Fondo de color suave para resaltar las filas de AFP Génesis en tablas.
+	measure 'Color Fila Génesis' = IF ( SELECTEDVALUE ( Fondos[codigo_administradora] ) = "AFPGENESIS", "#FFF6D6", "#FFFFFF" )
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000232
+
+	measure 'Patrimonio Seleccionado (M)' = DIVIDE ( [Patrimonio Total], 1e6 )
+		formatString: \$#,0.0 "M"
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000233
 
 	column ruc_fondo
 		dataType: string

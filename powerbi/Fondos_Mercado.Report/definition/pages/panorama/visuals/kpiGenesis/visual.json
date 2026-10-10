@@ -3,9 +3,9 @@
   "name": "kpiGenesis",
   "position": {
     "x": 1598,
-    "y": 108,
+    "y": 116,
     "z": 15,
-    "height": 115,
+    "height": 108,
     "width": 302,
     "tabOrder": 15
   },
@@ -27,8 +27,8 @@
                 }
               },
               "queryRef": "Patrimonio.Share AFPGENESIS %",
-              "nativeQueryRef": "Participación AFPGENESIS",
-              "displayName": "Participación AFPGENESIS"
+              "nativeQueryRef": "Participación AFP GÉNESIS",
+              "displayName": "Participación AFP GÉNESIS"
             }
           ]
         }
@@ -43,7 +43,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#0D2B5E'"
+                      "Value": "'#223A8F'"
                     }
                   }
                 }
@@ -52,7 +52,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "26D"
+                  "Value": "24D"
                 }
               }
             }
@@ -65,7 +65,18 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "12D"
+                  "Value": "11D"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#3A4656'"
+                    }
+                  }
                 }
               }
             }
@@ -74,6 +85,37 @@
       ]
     },
     "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
       "border": [
         {
           "properties": {
@@ -89,7 +131,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#D9E1EC'"
+                      "Value": "'#DCE3EE'"
                     }
                   }
                 }
@@ -98,7 +140,33 @@
             "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

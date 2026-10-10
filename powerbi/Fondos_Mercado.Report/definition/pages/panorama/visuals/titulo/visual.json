@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "titulo",
   "position": {
-    "x": 20,
-    "y": 8,
-    "z": 0,
-    "height": 55,
-    "width": 1880,
-    "tabOrder": 0
+    "x": 300,
+    "y": 10,
+    "z": 2,
+    "height": 48,
+    "width": 1300,
+    "tabOrder": 2
   },
   "visual": {
     "visualType": "textbox",
@@ -22,12 +22,12 @@
                     "value": "Panorama del Mercado de Fondos de Inversión",
                     "textStyle": {
                       "fontWeight": "bold",
-                      "fontSize": "26pt",
-                      "color": "#0D2B5E"
+                      "fontSize": "24pt",
+                      "color": "#223A8F"
                     }
                   }
                 ],
-                "horizontalTextAlignment": "center"
+                "horizontalTextAlignment": "left"
               }
             ]
           }

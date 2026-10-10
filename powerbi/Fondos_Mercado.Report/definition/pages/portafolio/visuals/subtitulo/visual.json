@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "subtitulo",
+  "position": {
+    "x": 300,
+    "y": 54,
+    "z": 3,
+    "height": 34,
+    "width": 1300,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Ranking de fondos y composición del portafolio por tipo de instrumento",
+                    "textStyle": {
+                      "fontWeight": "normal",
+                      "fontSize": "12pt",
+                      "color": "#3A4656"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

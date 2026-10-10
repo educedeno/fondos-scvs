@@ -1,0 +1,19 @@
+{
+  "name": "AFP Genesis",
+  "dataColors": ["#16568A", "#288FD4", "#ABCC61", "#EECF66", "#223A8F", "#7FB3E0", "#6E8F3A", "#B5952F", "#8FA3C9", "#C9DFA0"],
+  "background": "#FFFFFF",
+  "foreground": "#1F2A44",
+  "tableAccent": "#223A8F",
+  "good": "#2E8B3D",
+  "bad": "#C0392B",
+  "neutral": "#EECF66",
+  "maximum": "#16568A",
+  "center": "#7FB3E0",
+  "minimum": "#E8F1FA",
+  "textClasses": {
+    "callout": { "fontFace": "Segoe UI Semibold", "color": "#16568A" },
+    "title": { "fontFace": "Segoe UI Semibold", "color": "#223A8F", "fontSize": 13 },
+    "header": { "fontFace": "Segoe UI Semibold", "color": "#223A8F" },
+    "label": { "fontFace": "Segoe UI", "color": "#3A4656" }
+  }
+}
