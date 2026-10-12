@@ -11,12 +11,14 @@ annotation __PBI_TimeIntelligenceEnabled = 0
 
 annotation PBI_ProTooling = ["DevMode"]
 
-annotation PBI_QueryOrder = ["Fondos","Meses","Patrimonio","Composicion","URL_Datos"]
+annotation PBI_QueryOrder = ["Fondos","Meses","Patrimonio","Composicion","Diario","Rendimiento","URL_Datos"]
 
 ref table Fondos
 ref table Meses
 ref table Patrimonio
 ref table Composicion
+ref table Diario
+ref table Rendimiento
 
 ref cultureInfo en-US
 

@@ -1,0 +1,161 @@
+/// Rendimiento de cada fondo a su último día publicado (calculado con el valor de la unidad del resumen diario SCVS).
+table Rendimiento
+	lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000501
+
+	/// Último día publicado por la SCVS en el resumen diario.
+	measure 'Fecha Último Día' = CALCULATE ( MAX ( Rendimiento[fecha_corte] ), REMOVEFILTERS () )
+		formatString: dd/mm/yyyy
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000510
+
+	/// Patrimonio al último día, solo de fondos que siguen reportando (al día).
+	measure 'Patrimonio Al Día' = CALCULATE ( SUM ( Rendimiento[patrimonio] ), Rendimiento[al_dia] = "SI" )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000511
+
+	measure 'Patrimonio Al Día (M)' = DIVIDE ( [Patrimonio Al Día], 1e6 )
+		formatString: \$#,0.0 "M"
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000512
+
+	measure 'Partícipes' = CALCULATE ( SUM ( Rendimiento[participes] ), Rendimiento[al_dia] = "SI" )
+		formatString: #,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000513
+
+	/// Valor de la unidad (o cuota) al último día. Solo tiene sentido para un fondo.
+	measure 'Valor de la Unidad' = IF ( HASONEVALUE ( Rendimiento[ruc_fondo] ), MAX ( Rendimiento[valor_unidad] ) )
+		formatString: 0.000000
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000514
+
+	/// Rendimiento anualizado de los últimos 30 días. Para varios fondos, promedio ponderado por patrimonio.
+	measure 'Rend. 30 días' =
+			VAR T = FILTER ( Rendimiento, Rendimiento[al_dia] = "SI" && NOT ISBLANK ( Rendimiento[rend_30d] ) )
+			RETURN DIVIDE ( SUMX ( T, Rendimiento[rend_30d] * Rendimiento[patrimonio] ), SUMX ( T, Rendimiento[patrimonio] ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000515
+
+	measure 'Rend. 90 días' =
+			VAR T = FILTER ( Rendimiento, Rendimiento[al_dia] = "SI" && NOT ISBLANK ( Rendimiento[rend_90d] ) )
+			RETURN DIVIDE ( SUMX ( T, Rendimiento[rend_90d] * Rendimiento[patrimonio] ), SUMX ( T, Rendimiento[patrimonio] ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000516
+
+	measure 'Rend. 180 días' =
+			VAR T = FILTER ( Rendimiento, Rendimiento[al_dia] = "SI" && NOT ISBLANK ( Rendimiento[rend_180d] ) )
+			RETURN DIVIDE ( SUMX ( T, Rendimiento[rend_180d] * Rendimiento[patrimonio] ), SUMX ( T, Rendimiento[patrimonio] ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000517
+
+	measure 'Rend. 365 días' =
+			VAR T = FILTER ( Rendimiento, Rendimiento[al_dia] = "SI" && NOT ISBLANK ( Rendimiento[rend_365d] ) )
+			RETURN DIVIDE ( SUMX ( T, Rendimiento[rend_365d] * Rendimiento[patrimonio] ), SUMX ( T, Rendimiento[patrimonio] ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000518
+
+	measure 'Rend. Año Corrido' =
+			VAR T = FILTER ( Rendimiento, Rendimiento[al_dia] = "SI" && NOT ISBLANK ( Rendimiento[rend_anio_corrido] ) )
+			RETURN DIVIDE ( SUMX ( T, Rendimiento[rend_anio_corrido] * Rendimiento[patrimonio] ), SUMX ( T, Rendimiento[patrimonio] ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000519
+
+	measure 'Rend. 365 días Mercado' = CALCULATE ( [Rend. 365 días], ALLSELECTED ( Fondos ), REMOVEFILTERS ( Fondos[ruc_fondo], Fondos[Nombre legal], Fondos[Fondo], Fondos[nombre_corto], Fondos[Administradora], Fondos[codigo_administradora] ) )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000051a
+
+	measure 'Rend. 365 días AFPGENESIS' = CALCULATE ( [Rend. 365 días], ALLSELECTED ( Fondos ), REMOVEFILTERS ( Fondos[ruc_fondo], Fondos[Nombre legal], Fondos[Fondo], Fondos[nombre_corto], Fondos[Administradora], Fondos[codigo_administradora] ), Fondos[codigo_administradora] = "AFPGENESIS" )
+		formatString: 0.00%
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000051b
+
+	measure 'Texto Corte Diario' = "Fuente: Superintendencia de Compañías, Valores y Seguros (SCVS) – Resumen diario de fondos. Corte: " & FORMAT ( [Fecha Último Día], "dd/mm/yyyy" ) & " | Rendimiento anualizado simple (base 365) del valor de la unidad | Elaboración: AFP Génesis."
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000051c
+
+	column ruc_fondo
+		dataType: string
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000502
+		summarizeBy: none
+		sourceColumn: ruc_fondo
+
+	column fecha_corte
+		dataType: dateTime
+		isHidden
+		formatString: dd/mm/yyyy
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000503
+		summarizeBy: none
+		sourceColumn: fecha_corte
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column al_dia
+		dataType: string
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000504
+		summarizeBy: none
+		sourceColumn: al_dia
+
+	column valor_unidad
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000505
+		summarizeBy: none
+		sourceColumn: valor_unidad
+
+	column patrimonio
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000506
+		summarizeBy: sum
+		sourceColumn: patrimonio
+
+	column participes
+		dataType: int64
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000507
+		summarizeBy: sum
+		sourceColumn: participes
+
+	column rend_30d
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000508
+		summarizeBy: none
+		sourceColumn: rend_30d
+
+	column rend_90d
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000509
+		summarizeBy: none
+		sourceColumn: rend_90d
+
+	column rend_180d
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000050a
+		summarizeBy: none
+		sourceColumn: rend_180d
+
+	column rend_365d
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000050b
+		summarizeBy: none
+		sourceColumn: rend_365d
+
+	column rend_anio_corrido
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000050c
+		summarizeBy: none
+		sourceColumn: rend_anio_corrido
+
+	partition Rendimiento = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(Web.Contents(URL_Datos & "fondos_rendimiento.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Columnas = Table.SelectColumns(Encabezados, {"ruc_fondo", "fecha_corte", "al_dia", "valor_unidad", "patrimonio", "participes", "rend_30d", "rend_90d", "rend_180d", "rend_365d", "rend_anio_corrido"}),
+				    SinVacios = Table.ReplaceValue(Columnas, "", null, Replacer.ReplaceValue, {"rend_30d", "rend_90d", "rend_180d", "rend_365d", "rend_anio_corrido"}),
+				    Tipos = Table.TransformColumnTypes(SinVacios, {{"ruc_fondo", type text}, {"fecha_corte", type date}, {"al_dia", type text}, {"valor_unidad", type number}, {"patrimonio", type number}, {"participes", Int64.Type}, {"rend_30d", type number}, {"rend_90d", type number}, {"rend_180d", type number}, {"rend_365d", type number}, {"rend_anio_corrido", type number}}, "en-US")
+				in
+				    Tipos
+

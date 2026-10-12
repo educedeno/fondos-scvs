@@ -3,6 +3,7 @@ REM Doble clic para descargar los datos mas recientes de la SCVS y regenerar el 
 cd /d "%~dp0"
 python scripts\actualizar_datos.py || goto error
 python scripts\generar_dashboard.py || goto error
+python scripts\actualizar_diario.py || echo ATENCION: no se pudo bajar el resumen diario del catastro SCVS. Los datos mensuales si se actualizaron.
 del /q datos\_descarga_scvs.zip 2>nul
 echo.
 echo Listo. Datos en la carpeta "datos" y dashboard en "dashboard\Panorama_Fondos.html".

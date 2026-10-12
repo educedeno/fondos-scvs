@@ -1,0 +1,99 @@
+/// Resumen diario de cada fondo vigente (catastro SCVS): valor de la unidad, partícipes y patrimonio por día.
+table Diario
+	lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000401
+
+	/// Patrimonio diario del mercado en los últimos 12 meses. Se corta en el último día que ya reportaron todos los fondos al día, para que el final de la curva no caiga artificialmente.
+	measure 'Patrimonio Diario (12 meses)' =
+			VAR Completa = [Último Día Completo]
+			VAR Dia = MAX ( Diario[fecha] )
+			RETURN IF ( Dia > Completa - 365 && Dia <= Completa, SUM ( Diario[patrimonio] ) )
+		formatString: \$#,0
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000410
+
+	/// Valor de la unidad (o cuota) en los últimos 12 meses. Solo se muestra cuando hay un fondo seleccionado.
+	measure 'Valor de la Unidad (12 meses)' =
+			VAR Ultimo = CALCULATE ( MAX ( Diario[fecha] ), REMOVEFILTERS () )
+			RETURN IF ( HASONEVALUE ( Diario[ruc_fondo] ) && MAX ( Diario[fecha] ) > Ultimo - 365, AVERAGE ( Diario[valor_unidad] ) )
+		formatString: 0.000000
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000411
+
+	/// Último día en que ya reportaron todos los fondos al día (algunos publican con un día de retraso).
+	measure 'Último Día Completo' = CALCULATE ( MIN ( Rendimiento[fecha_corte] ), Rendimiento[al_dia] = "SI", REMOVEFILTERS () )
+		formatString: dd/mm/yyyy
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000412
+
+	column ruc_fondo
+		dataType: string
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000402
+		summarizeBy: none
+		sourceColumn: ruc_fondo
+
+	column fecha
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000403
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column valor_unidad
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000404
+		summarizeBy: none
+		sourceColumn: valor_unidad
+
+	column unidades
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000405
+		summarizeBy: sum
+		sourceColumn: unidades
+
+	column participes
+		dataType: int64
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000406
+		summarizeBy: sum
+		sourceColumn: participes
+
+	column participes_naturales
+		dataType: int64
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000407
+		summarizeBy: sum
+		sourceColumn: participes_naturales
+
+	column participes_juridicas
+		dataType: int64
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000408
+		summarizeBy: sum
+		sourceColumn: participes_juridicas
+
+	column activo
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000409
+		summarizeBy: sum
+		sourceColumn: activo
+
+	column patrimonio
+		dataType: double
+		isHidden
+		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-00000000040a
+		summarizeBy: sum
+		sourceColumn: patrimonio
+
+	partition Diario = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(Web.Contents(URL_Datos & "fondos_diario.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Tipos = Table.TransformColumnTypes(Encabezados, {{"ruc_fondo", type text}, {"fecha", type date}, {"valor_unidad", type number}, {"unidades", type number}, {"participes", Int64.Type}, {"participes_naturales", Int64.Type}, {"participes_juridicas", Int64.Type}, {"activo", type number}, {"patrimonio", type number}}, "en-US")
+				in
+				    Tipos
+

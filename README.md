@@ -8,7 +8,7 @@ Los datos salen de la información pública de la Superintendencia de Compañía
 | Carpeta / archivo | Para qué sirve |
 |---|---|
 | `dashboard/Panorama_Fondos.html` | **El dashboard listo para usar.** Se abre con doble clic y funciona sin internet. Sirve para la reunión del martes. |
-| `datos/` | Las tablas limpias (CSV) a las que se conecta Power BI. |
+| `datos/` | Las tablas limpias (CSV) a las que se conecta Power BI: mensuales (balances) y diarias (valor de la unidad, rendimiento). |
 | `GUIA_POWER_BI.md` | Paso a paso para armar el mismo tablero en Power BI, con las fórmulas listas para copiar. |
 | `actualizar.bat` | Doble clic para bajar los datos más nuevos y regenerar el dashboard. Necesita Python instalado. |
 | `config/fondos_administradoras.csv` | Indica a qué administradora pertenece cada fondo. Se edita con Excel. |
@@ -25,6 +25,18 @@ https://mercadodevalores.supercias.gob.ec/reportes/balancesConsolidadosMv.jsf
 - Composición del portafolio = cuentas **101.02.xx – Activos financieros** (bonos del Estado, obligaciones, papel comercial, certificados de depósito, titularizaciones, etc.).
 - Historia desde 2014. Los datos llegan con ~1 mes de rezago: el corte de agosto 2026 se publicó el 1 de octubre de 2026.
 
+### Segunda fuente: resumen diario de cada fondo
+
+Catastro público de la SCVS → **Fondos de inversión** → detalle de cada fondo → **Resumen diario**:
+https://appscvsgen.supercias.gob.ec/consultaCompanias/mercadoValores/catastroEntesMv.jsf
+
+- Tampoco pide usuario ni clave. El portal no tiene links fijos: cada página se abre con un código que caduca. Por eso `scripts/actualizar_diario.py` navega igual que una persona (catastro → listado → fondo → Excel).
+- Trae, por fondo y por día: **valor de la unidad**, número de unidades, partícipes (naturales y jurídicos), activo y **patrimonio neto**. Hay historia desde 2015.
+- Con el valor de la unidad se calcula el **rendimiento anualizado** de 30, 90, 180 y 365 días y del año corrido (`datos/fondos_rendimiento.csv`).
+- El patrimonio diario al cierre de mes cuadra al centavo con los balances mensuales (se probó con Estratégico, Master y Fondo Real a ago-2026).
+- El portal tiene un captcha que hoy no se activa. Si un día lo pide, la descarga se detiene y se conservan los datos anteriores. Si un fondo falla, también conserva sus datos anteriores.
+- La pestaña "Calificadoras de riesgos" solo dice **qué calificadora** contrató cada fondo, no la calificación. Por eso no se incluye.
+
 ## Validación contra el dashboard de referencia (capturas en `contexto/`)
 
 Se compararon los totales por administradora en dos fechas: **agosto 2026** y **septiembre 2025**.
@@ -38,7 +50,7 @@ Se compararon los totales por administradora en dos fechas: **agosto 2026** y **
 ## Pendientes
 
 1. **Confirmar los 4 fondos "POR CONFIRMAR".** Se resuelve editando `config/fondos_administradoras.csv`.
-2. **Datos diarios, rendimiento y calificación de riesgo.** Están en el catastro de la SCVS (`appscvsgen.supercias.gob.ec`), que estuvo caído el 9-oct-2026 por una migración de base de datos anunciada para el 10–11 de octubre. Cuando vuelva, se agrega como segunda fuente.
+2. **Calificación de riesgo de cada fondo.** El catastro solo dice qué calificadora tiene cada fondo, no la nota. Habría que buscarla en los informes de las calificadoras. (Los datos diarios y el rendimiento ya se bajan solos desde el catastro, ver arriba.)
 3. **Activar la actualización automática en la nube:** crear un repositorio en GitHub y subir esta carpeta (ver abajo).
 
 ## Actualización automática en la nube (para que Power BI solo dé "Actualizar")
@@ -48,4 +60,4 @@ Se compararon los totales por administradora en dos fechas: **agosto 2026** y **
 3. GitHub ejecuta `.github/workflows/actualizar.yml` todos los días a las 07:00 (hora de Ecuador). Si la SCVS publicó datos nuevos, actualiza los CSV.
 4. En Power BI se conecta con **Obtener datos → Web** a:
    `https://raw.githubusercontent.com/educedeno/fondos-scvs/main/datos/fondos_patrimonio_mensual.csv`
-   y lo mismo con `fondos.csv` y `fondos_composicion_mensual.csv`.
+   y lo mismo con `fondos.csv`, `fondos_composicion_mensual.csv`, `fondos_diario.csv` y `fondos_rendimiento.csv`.
