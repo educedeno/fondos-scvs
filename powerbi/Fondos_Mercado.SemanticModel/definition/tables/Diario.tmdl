@@ -6,7 +6,10 @@ table Diario
 	measure 'Patrimonio Diario (12 meses)' =
 			VAR Completa = [Último Día Completo]
 			VAR Dia = MAX ( Diario[fecha] )
-			RETURN IF ( Dia > Completa - 365 && Dia <= Completa, SUM ( Diario[patrimonio] ) )
+			-- Días en que la SCVS no publicó a varios fondos: se omiten para no mostrar caídas falsas.
+			VAR NFondos = DISTINCTCOUNT ( Diario[ruc_fondo] )
+			VAR NVecinos = MAXX ( FILTER ( ALL ( Diario[fecha] ), Diario[fecha] >= Dia - 10 && Diario[fecha] <= Dia + 10 ), CALCULATE ( DISTINCTCOUNT ( Diario[ruc_fondo] ) ) )
+			RETURN IF ( Dia > Completa - 365 && Dia <= Completa && NFondos >= 0.9 * NVecinos, SUM ( Diario[patrimonio] ) )
 		formatString: \$#,0
 		lineageTag: 6f1d2c10-0b3a-4d1e-9c11-000000000410
 

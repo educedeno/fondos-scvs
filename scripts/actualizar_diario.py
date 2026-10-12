@@ -285,10 +285,15 @@ def rendimientos(filas):
     validas = [f for f in filas if float(f["valor_unidad"]) > 0]
     if not validas:
         return None
-    serie = [(dt.date.fromisoformat(f["fecha"]), float(f["valor_unidad"])) for f in validas]
+    # Un fondo nuevo publica un valor de unidad provisional (1 o 100) mientras su patrimonio es 0.
+    # El rendimiento se mide desde el primer dia con patrimonio, para no leer ese salto como ganancia.
+    arranque = next((i for i, f in enumerate(validas) if float(f["patrimonio"] or 0) > 0), None)
+    serie = [(dt.date.fromisoformat(f["fecha"]), float(f["valor_unidad"])) for f in validas[arranque or 0:]]
     corte, vu = serie[-1]
     res = {"fecha_corte": corte.isoformat(), "valor_unidad": vu,
            "patrimonio": validas[-1]["patrimonio"], "participes": validas[-1]["participes"]}
+    if arranque is None:
+        serie = []  # nunca tuvo patrimonio: sin rendimiento
 
     def valor_en(fecha):
         # ultimo valor publicado en o antes de la fecha (fines de semana y feriados no se publican)

@@ -3,3 +3,8 @@ __pycache__/
 *.pbix.bak
 contexto/
 powerbi/**/.pbi/
+
+# Archivos de trabajo locales (nunca subir)
+*.zip
+_vero/
+Panorama_Fondos_Genesis*
