@@ -81,7 +81,7 @@ class Portal:
         if params:
             url += "?" + urllib.parse.urlencode(params)
         req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "es-EC,es;q=0.9"})
-        with self.op.open(req, timeout=120) as r:
+        with self.op.open(req, timeout=60) as r:
             return r.geturl(), r.read()
 
     def ajax(self, pagina, form, fuente, extra=None):
@@ -101,7 +101,7 @@ class Portal:
                      "Faces-Request": "partial/ajax", "X-Requested-With": "XMLHttpRequest",
                      "Accept": "application/xml, text/xml, */*; q=0.01",
                      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"})
-        with self.op.open(req, timeout=120) as r:
+        with self.op.open(req, timeout=60) as r:
             xml = r.read().decode("utf-8", "replace")
         if "<partial-response" not in xml:
             raise ErrorPortal("respuesta inesperada del portal (posible bloqueo del firewall)")
@@ -308,7 +308,7 @@ def rendimientos(filas):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--max", type=int, help="descargar solo N fondos (para pruebas)")
-    ap.add_argument("--pausa", type=float, default=1.0, help="segundos entre fondos (para no saturar el portal)")
+    ap.add_argument("--pausa", type=float, default=3.0, help="segundos entre fondos (el firewall de la SCVS bloquea si se piden muy rapido)")
     a = ap.parse_args()
     os.makedirs(DATOS, exist_ok=True)
 
@@ -319,24 +319,30 @@ def main():
     print(f"Catastro SCVS: {total} fondos en {paginas} paginas")
 
     catastro, nuevos, fallidos = [], {}, []
-    captcha = False
+    detener = False  # captcha o portal sin responder: no insistir
+    seguidos = 0     # fondos fallidos consecutivos
     for n in range(paginas):
+        if detener:
+            break  # el catastro queda incompleto y no se sobrescribe
         filas = None
         for intento in range(3):
             try:
+                if intento:
+                    # sesion nueva por si la anterior quedo invalida
+                    time.sleep(5 * intento)
+                    portal = Portal()
+                    listado = abrir_listado(portal)
                 filas = ir_a_pagina(portal, listado, n)
                 break
-            except Exception as e:  # noqa: BLE001 - se reintenta con una sesion nueva
+            except Exception as e:  # noqa: BLE001
                 print(f"  pagina {n + 1}: {e}; reintentando")
-                time.sleep(5 * (intento + 1))
-                portal = Portal()
-                listado = abrir_listado(portal)
         if filas is None:
-            raise ErrorPortal(f"no se pudo leer la pagina {n + 1} del listado")
+            print(f"ATENCION: no se pudo leer la pagina {n + 1} del listado. Se conservan los datos anteriores de los fondos que falten.")
+            break
         for _, celdas, boton in filas:
             catastro.append(celdas)
             ruc, nombre, estado = celdas[0], celdas[1], celdas[5]
-            if estado != "VIGENTE" or captcha or (a.max and len(nuevos) + len(fallidos) >= a.max):
+            if estado != "VIGENTE" or detener or (a.max and len(nuevos) + len(fallidos) >= a.max):
                 continue
             for intento in range(3):
                 try:
@@ -355,11 +361,18 @@ def main():
                     if "captcha" in str(e):
                         # No insistir: se conservan los datos anteriores de los fondos que falten
                         print(f"ATENCION: {e}. Se dejan de descargar fondos por hoy.")
-                        captcha = True
+                        detener = True
                         break
                     print(f"  ... {ruc}: {e}; reintentando")
             if ruc not in nuevos:
                 fallidos.append(f"{ruc} {nombre}")
+                seguidos += 1
+                if seguidos >= 3 and not detener:
+                    print("ATENCION: 3 fondos seguidos fallaron; el portal no responde o bloqueo las consultas. "
+                          "Se dejan de descargar fondos por hoy y se conservan los datos anteriores.")
+                    detener = True
+            else:
+                seguidos = 0
             time.sleep(a.pausa)
 
     if not nuevos:
