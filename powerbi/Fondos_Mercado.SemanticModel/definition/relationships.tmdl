@@ -14,3 +14,11 @@ relationship 7a1e0c3b-1111-4a00-8000-000000000004
 	fromColumn: Composicion.fecha
 	toColumn: Meses.Fecha
 
+
+relationship 7a1e0c3b-1111-4a00-8000-000000000005
+	fromColumn: Diario.ruc_fondo
+	toColumn: Fondos.ruc_fondo
+
+relationship 7a1e0c3b-1111-4a00-8000-000000000006
+	fromColumn: Rendimiento.ruc_fondo
+	toColumn: Fondos.ruc_fondo

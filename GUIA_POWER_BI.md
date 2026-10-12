@@ -11,18 +11,26 @@ El archivo **`Panorama_Fondos_Inversion.pbix`** ya trae el tablero completo arma
 2. Presiona **Inicio → Actualizar**. La primera vez, Power BI pregunta cómo conectarse a `raw.githubusercontent.com`: elige **Anónimo** y presiona **Conectar**. Los datos son públicos, así que no hace falta usuario ni clave.
 3. Listo. Para ver los fondos de una administradora, haz clic en el **⊞** junto a su nombre en el ranking.
 4. **Mes de corte:** si lo dejas vacío, muestra siempre el último mes publicado. Si eliges un mes, todo el tablero muestra ese mes, excepto las gráficas de evolución, que siempre muestran los últimos 24 meses.
+5. **Página "Rendimiento Diario":** muestra el rendimiento anualizado de cada fondo (30, 90, 180 y 365 días y año corrido), el patrimonio diario del mercado y el valor de la unidad. Para ver la curva del valor de la unidad, elige **un** fondo en el filtro **Fondo**. Cuando se muestran varios fondos juntos, el rendimiento es el promedio ponderado por patrimonio.
+
+> **Si tu `.pbix` no tiene la página "Rendimiento Diario":** abre `powerbi/Fondos_Mercado.pbip` con Power BI Desktop, presiona **Actualizar** y luego **Archivo → Guardar como** con el nombre `Panorama_Fondos_Inversion.pbix`.
 
 El resto de esta guía sirve para modificar el tablero o armar uno nuevo desde cero.
 
 ---
 
-## 1. Las 3 tablas de datos
+## 1. Las tablas de datos
 
 | Archivo | Qué contiene | Una fila por… |
 |---|---|---|
 | `fondos.csv` | Lista de fondos: nombre, administradora, tipo y plazo | fondo |
 | `fondos_patrimonio_mensual.csv` | Patrimonio, activo y pasivo de cada fondo | fondo y mes |
 | `fondos_composicion_mensual.csv` | En qué invierte cada fondo (bonos, obligaciones, papel comercial, etc.) | fondo, mes e instrumento |
+| `fondos_diario.csv` | Valor de la unidad, partícipes, activo y patrimonio de cada fondo vigente | fondo y día |
+| `fondos_rendimiento.csv` | Rendimiento anualizado de cada fondo a su último día publicado | fondo |
+| `fondos_catastro.csv` | Listado oficial de fondos de la SCVS (vigentes y cancelados) | fondo |
+
+El rendimiento se calcula con el valor de la unidad: `(valor hoy ÷ valor hace N días − 1) × 365 ÷ N`. Es un rendimiento anualizado simple (base 365). La columna `al_dia` dice si el fondo sigue reportando. Los que tienen más de 15 días sin reportar no cuentan en los totales.
 
 **¿De dónde se conecta Power BI?** Hay dos opciones:
 
@@ -159,6 +167,8 @@ Pon este texto en el pie del tablero: *"Fuente: Superintendencia de Compañías,
 
 ### ¿Cada cuánto cambian los datos?
 La Superintendencia publica los balances de los fondos **una vez al mes**. Los datos de un mes aparecen aproximadamente el día 1 del mes subsiguiente (por ejemplo, agosto apareció el 1 de octubre).
+
+El **resumen diario** (valor de la unidad, patrimonio y partícipes) se publica **todos los días hábiles**, con 2 a 4 días de rezago. Lo baja la misma actualización automática de las 07:00.
 
 ---
 

@@ -1,4 +1,5 @@
-# Actualiza automaticamente los datos de fondos de inversion desde la SCVS.
+# Actualiza automaticamente los datos de fondos de inversion desde la SCVS:
+# balances mensuales y resumen diario de cada fondo (valor de la unidad, patrimonio).
 # Corre todos los dias a las 07:00 (hora Ecuador). Solo guarda cambios si la
 # Superintendencia publico datos nuevos.
 name: Actualizar datos SCVS
@@ -25,12 +26,17 @@ jobs:
           python scripts/actualizar_datos.py
           python scripts/generar_dashboard.py
           rm -f datos/_descarga_scvs.zip
+      - name: Resumen diario de cada fondo (catastro SCVS)
+        # Si el portal del catastro falla, igual se guardan los datos mensuales
+        continue-on-error: true
+        timeout-minutes: 40
+        run: python scripts/actualizar_diario.py
       - name: Guardar cambios
         run: |
           git config user.name "actualizador-automatico"
           git config user.email "actions@users.noreply.github.com"
           git add datos dashboard
-          if git diff --cached --quiet -- datos/fondos_patrimonio_mensual.csv datos/fondos_composicion_mensual.csv datos/fondos.csv; then
+          if git diff --cached --quiet -- datos/fondos_patrimonio_mensual.csv datos/fondos_composicion_mensual.csv datos/fondos.csv datos/fondos_diario.csv datos/fondos_catastro.csv; then
             echo "Sin datos nuevos de la SCVS."
             # Señal de vida: GitHub apaga las tareas programadas tras 60 dias sin actividad.
             # Si el ultimo commit tiene mas de 30 dias, se guarda un registro pequeño.
