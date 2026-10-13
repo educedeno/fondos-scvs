@@ -148,13 +148,24 @@ def procesar(ruta_zip):
         # Fondos que ya no reportan (liquidados) no necesitan administradora asignada
         return "FONDOS CERRADOS" if fondos[ruc][1] < ultimo else "SIN ASIGNAR"
 
-    with open(os.path.join(DATOS, "fondos.csv"), "w", newline="", encoding="utf-8-sig") as f:
+    # Fondos nuevos que agrego el resumen diario y aun no salen en los balances: se conservan
+    ruta_fondos = os.path.join(DATOS, "fondos.csv")
+    solo_diario = []
+    if os.path.exists(ruta_fondos):
+        with open(ruta_fondos, encoding="utf-8-sig") as f:
+            solo_diario = [r for r in list(csv.reader(f))[1:] if r and r[0] not in fondos]
+        for r in solo_diario:
+            if mapeo.get(r[0], {}).get("administradora"):
+                r[3] = mapeo[r[0]]["administradora"].strip()
+
+    with open(ruta_fondos, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["ruc_fondo", "fondo", "nombre_corto", "administradora", "plazo_permanencia", "tipo_fondo", "ultimo_reporte"])
         for ruc, (nom, ult) in sorted(fondos.items(), key=lambda x: x[1][0]):
             m = mapeo.get(ruc, {})
             w.writerow([ruc, nom, m.get("nombre_corto", ""), admin_de(ruc),
                         m.get("plazo_permanencia", ""), m.get("tipo_fondo", ""), ult])
+        w.writerows(solo_diario)
 
     with open(os.path.join(DATOS, "fondos_patrimonio_mensual.csv"), "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f, lineterminator="\n")

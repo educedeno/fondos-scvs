@@ -310,6 +310,31 @@ def rendimientos(filas):
     return res
 
 
+def agregar_fondos_nuevos(diario, mapeo, catastro, admin_de):
+    """Fondos que ya publican resumen diario pero aun no salen en los balances mensuales:
+    se agregan a fondos.csv para que Power BI sepa a que administradora pertenecen."""
+    ruta = os.path.join(DATOS, "fondos.csv")
+    if not os.path.exists(ruta):
+        return
+    with open(ruta, encoding="utf-8-sig") as f:
+        lector = csv.reader(f)
+        next(lector)  # encabezado
+        filas = list(lector)
+    conocidos = {fila[0] for fila in filas}
+    nuevos = []
+    for ruc in sorted(set(diario) - conocidos):
+        m = mapeo.get(ruc, {})
+        c = catastro.get(ruc)
+        nombre = m.get("fondo") or (c[1] if c else ruc)
+        tipo = m.get("tipo_fondo") or ("Colectivo" if "COLECTIVO" in nombre.upper() else "Administrado")
+        nuevos.append([ruc, nombre, m.get("nombre_corto", ""), admin_de(ruc), m.get("plazo_permanencia", ""), tipo,
+                       max(fila["fecha"] for fila in diario[ruc])])
+    if nuevos:
+        with open(ruta, "a", newline="", encoding="utf-8") as f:
+            csv.writer(f, lineterminator="\n").writerows(nuevos)
+        print(f"Fondos agregados a fondos.csv desde el resumen diario: {len(nuevos)}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--max", type=int, help="descargar solo N fondos (para pruebas)")
@@ -422,6 +447,8 @@ def main():
                 w.writerow([ruc, admin_de(ruc), r["fecha_corte"], "SI" if r["fecha_corte"] >= limite else "NO",
                             r["valor_unidad"], r["patrimonio"], r["participes"]]
                            + [r[n] for n, _ in PLAZOS] + [r["rend_anio_corrido"]])
+
+    agregar_fondos_nuevos(diario, mapeo, {c[0]: c for c in catastro}, admin_de)
 
     with open(os.path.join(DATOS, "ultima_actualizacion_diario.txt"), "w", encoding="utf-8") as f:
         f.write(f"Procesado: {dt.datetime.now():%Y-%m-%d %H:%M}\nUltimo dia disponible en SCVS: {ultima}\n"
