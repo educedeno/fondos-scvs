@@ -7,7 +7,7 @@ Los datos salen de la información pública de la Superintendencia de Compañía
 
 | Carpeta / archivo | Para qué sirve |
 |---|---|
-| `dashboard/Panorama_Fondos.html` | **El dashboard listo para usar.** Se abre con doble clic y funciona sin internet. Sirve para la reunión del martes. |
+| `dashboard/Panorama_Fondos.html` | **El dashboard listo para usar.** Se abre con doble clic y funciona sin internet. |
 | `datos/` | Las tablas limpias (CSV) a las que se conecta Power BI: mensuales (balances) y diarias (valor de la unidad, rendimiento). |
 | `GUIA_POWER_BI.md` | Paso a paso para armar el mismo tablero en Power BI, con las fórmulas listas para copiar. |
 | `actualizar.bat` | Doble clic para bajar los datos más nuevos y regenerar el dashboard. Necesita Python instalado. |
@@ -37,15 +37,9 @@ https://appscvsgen.supercias.gob.ec/consultaCompanias/mercadoValores/catastroEnt
 - El portal tiene un captcha que hoy no se activa. Si un día lo pide, la descarga se detiene y se conservan los datos anteriores. Si un fondo falla, también conserva sus datos anteriores.
 - La pestaña "Calificadoras de riesgos" solo dice **qué calificadora** contrató cada fondo, no la calificación. Por eso no se incluye.
 
-## Validación contra el dashboard de referencia (capturas en `contexto/`)
+## Fondos sin administradora confirmada
 
-Se compararon los totales por administradora en dos fechas: **agosto 2026** y **septiembre 2025**.
-
-- **13 de 16 administradoras cuadran al dólar** en ambas fechas: FIDUCIA, FIDEVAL, ANEFI, AFPGENESIS, ZION, FIDUTLAN, AFPV, SMARTFONDOS, PLUSFONDOS, GENERATRUST, MAXFONDOS, CAPITALIUM, ADMUNIFONDOS y FUTURFID.
-- **Los 6 fondos de AFP Génesis cuadran exacto:** Renta Plus, Horizonte, Estratégico, Eficaz, Superior y Master.
-- **VANGUARDIA sale 1.67% más alta.** Aquí se incluye su fondo colectivo nuevo CONSTRUYE PATRIMONIO 01, que el dashboard de referencia no tiene.
-- **HOPE: no se pudo identificar su fondo.** Hay 4 fondos colectivos pequeños (TERRA 05, ATLAS, PATRIMONIO VERDE 01 y FUTURO BRILLANTE 01; ~$14.5 M en total, 0.4% del mercado) marcados **"POR CONFIRMAR"**. Probablemente TERRA 05 es de HOPE.
-- **Composición de AFP Génesis:** Deuda Pública 69.6%, Obligaciones 16.6% y Depósitos 12.5%. En la referencia son 68.4%, 15.5% y 12.2%.
+Hay 4 fondos colectivos pequeños (TERRA 05, ATLAS, PATRIMONIO VERDE 01 y FUTURO BRILLANTE 01; ~$14.5 M en total, 0.4% del mercado) marcados **"POR CONFIRMAR"** en `config/fondos_administradoras.csv`. Probablemente TERRA 05 es de HOPE.
 
 ## Pendientes
 

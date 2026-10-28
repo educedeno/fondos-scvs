@@ -144,7 +144,7 @@ Para que los porcentajes se vean con el símbolo %: selecciona cada medida de po
 
 ---
 
-## 5. Armar los visuales (igual al tablero de referencia)
+## 5. Armar los visuales
 
 | Visual | Cómo armarlo |
 |---|---|
