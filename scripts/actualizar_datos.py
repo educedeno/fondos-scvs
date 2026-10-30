@@ -23,6 +23,7 @@ import datetime as dt
 import io
 import os
 import sys
+import time
 import urllib.request
 import zipfile
 
@@ -83,15 +84,24 @@ def fecha_iso(txt):
     return dt.datetime.strptime(txt.strip(), "%d/%m/%Y").date().isoformat()
 
 
-def descargar(destino):
+def descargar(destino, intentos=4):
     print(f"Descargando {URL_ZIP} ...")
     req = urllib.request.Request(URL_ZIP, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=1800) as r, open(destino, "wb") as f:
-        while True:
-            bloque = r.read(1 << 20)
-            if not bloque:
-                break
-            f.write(bloque)
+    for intento in range(intentos):
+        try:
+            with urllib.request.urlopen(req, timeout=1800) as r, open(destino, "wb") as f:
+                while True:
+                    bloque = r.read(1 << 20)
+                    if not bloque:
+                        break
+                    f.write(bloque)
+            break
+        except OSError as e:  # el servidor de la SCVS a veces no responde por unos minutos
+            if intento == intentos - 1:
+                raise
+            espera = 60 * (intento + 1)
+            print(f"  fallo la descarga ({e}); reintento en {espera} s")
+            time.sleep(espera)
     print(f"  ok ({os.path.getsize(destino) / 1e6:.0f} MB)")
 
 

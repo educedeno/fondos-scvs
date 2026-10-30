@@ -27,6 +27,7 @@ jobs:
           python scripts/generar_dashboard.py
           rm -f datos/_descarga_scvs.zip
       - name: Resumen diario de cada fondo (catastro SCVS)
+        id: diario
         # Si el portal del catastro falla, igual se guardan los datos mensuales
         continue-on-error: true
         timeout-minutes: 40
@@ -51,3 +52,11 @@ jobs:
             git commit -m "Datos SCVS actualizados $(date +%Y-%m-%d)"
             git push
           fi
+      - name: Avisar si el resumen diario fallo
+        # Los datos mensuales ya se guardaron; la ejecucion queda en rojo para que llegue el aviso por correo
+        if: steps.diario.outcome == 'failure'
+        run: |
+          echo "::error::No se pudo bajar el resumen diario del catastro SCVS (appscvsgen.supercias.gob.ec). Los datos diarios no se actualizaron hoy."
+          echo "### El resumen diario no se actualizo" >> "$GITHUB_STEP_SUMMARY"
+          echo "El catastro de la SCVS no respondio. Si sigue asi varios dias, correr actualizar.bat desde un equipo en Ecuador." >> "$GITHUB_STEP_SUMMARY"
+          exit 1

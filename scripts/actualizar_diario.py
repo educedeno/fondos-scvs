@@ -134,9 +134,23 @@ def parametro(args):
     return p
 
 
+def abrir_catastro(portal, intentos=4):
+    """Primera pagina del catastro. El portal a veces no responde por varios minutos: se reintenta."""
+    for intento in range(intentos):
+        try:
+            return portal.pagina(BASE + "/catastroEntesMv.jsf", form="frmCatastroEntesMv")
+        except OSError as e:  # timeout o conexion rechazada (urllib.error.URLError es OSError)
+            if intento == intentos - 1:
+                raise ErrorPortal(f"el catastro de la SCVS no responde ({e}); "
+                                  "puede estar caido o bloqueando la IP de este equipo") from e
+            espera = 60 * (intento + 1)
+            print(f"  el catastro no responde ({e}); reintento en {espera} s")
+            time.sleep(espera)
+
+
 def abrir_listado(portal):
     """Catastro -> Fondos de inversion -> listado (dos redirecciones con codigo temporal)."""
-    cat = portal.pagina(BASE + "/catastroEntesMv.jsf", form="frmCatastroEntesMv")
+    cat = abrir_catastro(portal)
     _, args = portal.ajax(cat, "frmCatastroEntesMv", BOTON_FONDOS)
     F = "frmListadoEntesMvPreliminar"
     pre = portal.pagina(BASE + "/listadoEntesMvPreliminar.jsf", {"p": parametro(args)}, form=F)
