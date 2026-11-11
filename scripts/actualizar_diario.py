@@ -323,6 +323,8 @@ def agregar_fondos_nuevos(diario, mapeo, catastro, admin_de):
     conocidos = {fila[0] for fila in filas}
     nuevos = []
     for ruc in sorted(set(diario) - conocidos):
+        if not diario[ruc]:
+            continue  # fondo recien inscrito que todavia no reporta ningun dia
         m = mapeo.get(ruc, {})
         c = catastro.get(ruc)
         nombre = m.get("fondo") or (c[1] if c else ruc)
@@ -342,8 +344,17 @@ def main():
     a = ap.parse_args()
     os.makedirs(DATOS, exist_ok=True)
 
-    portal = Portal()
-    listado = abrir_listado(portal)
+    # El portal a veces no contesta al primer intento (sobre todo desde la nube): se insiste unas veces
+    for intento in range(5):
+        try:
+            portal = Portal()
+            listado = abrir_listado(portal)
+            break
+        except Exception as e:  # noqa: BLE001
+            if intento == 4:
+                raise
+            print(f"  el portal no respondio ({e}); reintento {intento + 1} de 4 en {30 * (intento + 1)} s")
+            time.sleep(30 * (intento + 1))
     total = int(re.search(r"rowCount:(\d+)", listado["html"]).group(1))
     paginas = (total + FILAS_POR_PAGINA - 1) // FILAS_POR_PAGINA
     print(f"Catastro SCVS: {total} fondos en {paginas} paginas")
