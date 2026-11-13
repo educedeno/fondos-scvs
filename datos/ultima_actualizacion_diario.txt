@@ -1,7 +1,3 @@
-Procesado: 2026-11-12 19:51
-Ultimo dia disponible en SCVS: 2026-11-11
-Fondos descargados hoy: 54
-No se pudieron descargar (se conservan sus datos anteriores):
-  0993367185001 FONDO DE INVERSION ADMINISTRADO MULTIPLICA
-  0993401160001 FONDO DE INVERSION ADMINISTRADO NOVA
-  1793150446001 FONDO DE INVERSIÓN ADMINISTRADO OBJETIVO
+Procesado: 2026-11-13 19:37
+Ultimo dia disponible en SCVS: 2026-11-12
+Fondos descargados hoy: 92
